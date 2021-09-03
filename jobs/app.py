@@ -1,6 +1,6 @@
 #from sqlite3.dbapi2 import connect
 import sqlite3
-from flask import Flask, render_template, globals as g
+from flask import Flask, render_template, g
 
 
 PATH = "db/jobs.sqlite"
