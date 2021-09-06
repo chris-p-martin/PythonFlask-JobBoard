@@ -1,6 +1,12 @@
 #from sqlite3.dbapi2 import connect
+from os import stat_result
 import sqlite3
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, request
+import datetime
+from flask.helpers import url_for
+
+from jinja2.tests import test_iterable
+from werkzeug.utils import redirect
 
 
 PATH = "db/jobs.sqlite"
@@ -42,3 +48,15 @@ def employer(employer_id):
     jobs     = execute_sql('SELECT job.id, job.title, job.description, job.salary FROM job JOIN employer ON employer.id = job.employer_id WHERE employer.id = ?', [employer_id])
     reviews  = execute_sql('SELECT review, rating, title, date, status FROM review JOIN employer ON employer.id = review.employer_id WHERE employer.id = ?', [employer_id])
     return render_template("employer.html", employer=employer, jobs=jobs, reviews=reviews)
+
+@app.route("/employer/<employer_id>/review",  methods = ['GET', 'POST'])
+def review(employer_id):
+    if request.method is "POST":
+        review = request.form['review']
+        rating = request.form['rating']
+        title  = request.form['title']
+        status = request.form['status']
+        date = datetime.datetime.now().strftime("%m/%d/%Y")
+        execute_sql('INSERT INTO review (review, rating, title, date, status, employer_id) VALUES (?, ?, ?, ?, ?, ?)', (review, rating, title, date, status, employer_id), commit=True)
+        redirect(url_for('review', employer_id=employer['id']))
+    return render_template("review.html", employerid=[employer_id])
